@@ -6,6 +6,11 @@ package:
   version: {{ version }}
 
 source:
+  # Use local source with fixes already applied.
+  # For Linux builds, push this repo to your GitHub fork and change to:
+  #   git_url: https://github.com/xiaz9n/MIRTK.git
+  #   git_rev: master
+  #   git_depth: -1
   path: ../../mirtk-source
 
 build:
@@ -27,6 +32,7 @@ requirements:
     - boost-cpp
     - libpng
     - zlib
+    - fltk
   run:
     - python
     - vtk
@@ -34,6 +40,7 @@ requirements:
     - boost-cpp
     - libpng
     - zlib
+    - fltk
 
 test:
   commands:
