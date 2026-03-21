@@ -2,10 +2,27 @@
 
 Pre-built conda packages for [MIRTK](https://github.com/BioMedIA/MIRTK) (Medical Image Registration ToolKit).
 
+## Supported Platforms
+
+| Platform | Branch | Status |
+|----------|--------|--------|
+| macOS Apple Silicon (M1/M2/M3/M4) | [`viewer-for-mac`](https://github.com/kiwixiao/mirtk-install/tree/viewer-for-mac) | Available (with Viewer + FLTK) |
+| Linux x86_64 (Ubuntu, CentOS, etc.) | [`viewer-for-linux`](https://github.com/kiwixiao/mirtk-install/tree/viewer-for-linux) | Available (with Viewer + FLTK) |
+
 ## Quick Install
 
+Pick the branch for your platform, then run the installer:
+
+**macOS Apple Silicon:**
 ```bash
-git clone https://github.com/kiwixiao/mirtk-install.git
+git clone -b viewer-for-mac https://github.com/kiwixiao/mirtk-install.git
+cd mirtk-install
+bash install.sh
+```
+
+**Linux x86_64:**
+```bash
+git clone -b viewer-for-linux https://github.com/kiwixiao/mirtk-install.git
 cd mirtk-install
 bash install.sh
 ```
@@ -23,14 +40,8 @@ conda activate mirtk
 mirtk help
 mirtk register --help
 mirtk transform-image --help
+mirtk view image.nii.gz
 ```
-
-## Supported Platforms
-
-| Platform | Status | Package |
-|----------|--------|---------|
-| macOS Apple Silicon (M1/M2/M3/M4) | Available | `packages/osx-arm64/` |
-| Linux x86_64 (Ubuntu, CentOS, etc.) | Coming soon | `packages/linux-64/` |
 
 ## Requirements
 
