@@ -6,9 +6,7 @@ package:
   version: {{ version }}
 
 source:
-  git_url: https://github.com/kiwixiao/MIRTK.git
-  git_rev: {{ git_rev }}
-  git_depth: -1
+  path: ../../mirtk-source
 
 build:
   number: 0
