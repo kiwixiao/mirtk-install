@@ -53,3 +53,16 @@ conda build conda-recipe/mirtk --output-folder ~/conda-channel
 MIRTK is a C++ toolkit for medical image registration supporting rigid, affine,
 and non-rigid registration. It includes ~80 command-line tools for image processing,
 surface mesh operations, and transformation utilities.
+
+## Credits
+
+MIRTK was originally developed by [Andreas Schuh](https://github.com/schuhschuh)
+at Imperial College London. The original source code is available at
+[BioMedIA/MIRTK](https://github.com/BioMedIA/MIRTK).
+
+This repository provides conda packaging with patches for modern toolchain
+compatibility (CMake 4.x, Eigen 3.4+, VTK 9.x, TBB 2022+).
+
+## License
+
+MIRTK is licensed under the [Apache License 2.0](https://github.com/BioMedIA/MIRTK/blob/master/LICENSE.txt).
