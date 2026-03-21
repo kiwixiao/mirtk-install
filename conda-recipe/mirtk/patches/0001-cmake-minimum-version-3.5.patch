@@ -1,0 +1,91 @@
+diff --git a/CMake/Basis/BasisSettings.cmake b/CMake/Basis/BasisSettings.cmake
+index 60d1b77..9eecec0 100644
+--- a/CMake/Basis/BasisSettings.cmake
++++ b/CMake/Basis/BasisSettings.cmake
+@@ -46,7 +46,7 @@ endif ()
+ # CMake version and policies
+ # ============================================================================
+ 
+-cmake_minimum_required (VERSION 2.8.12 FATAL_ERROR)
++cmake_minimum_required (VERSION 3.5 FATAL_ERROR)
+ 
+ # Add policies introduced with CMake versions newer than the one specified
+ # above. These policies would otherwise trigger a policy not set warning by
+diff --git a/CMake/Basis/ProjectTools.cmake b/CMake/Basis/ProjectTools.cmake
+index e9bb4e8..eb262d7 100644
+--- a/CMake/Basis/ProjectTools.cmake
++++ b/CMake/Basis/ProjectTools.cmake
+@@ -1879,7 +1879,7 @@ endfunction()
+ macro (basis_project_initialize)
+   # --------------------------------------------------------------------------
+   # CMake version and policies
+-  cmake_minimum_required (VERSION 2.8.12 FATAL_ERROR)
++  cmake_minimum_required (VERSION 3.5 FATAL_ERROR)
+ 
+   # Add policies introduced with CMake versions newer than the one specified
+   # above. These policies would otherwise trigger a policy not set warning by
+diff --git a/CMake/Basis/cmake_uninstall.cmake.in b/CMake/Basis/cmake_uninstall.cmake.in
+index 7180dd2..71609e7 100644
+--- a/CMake/Basis/cmake_uninstall.cmake.in
++++ b/CMake/Basis/cmake_uninstall.cmake.in
+@@ -14,7 +14,7 @@
+ # @ingroup CMakeTools
+ ##############################################################################
+ 
+-cmake_minimum_required (VERSION 2.8.12 FATAL_ERROR)
++cmake_minimum_required (VERSION 3.5 FATAL_ERROR)
+ 
+ # ----------------------------------------------------------------------------
+ # set the install prefix
+diff --git a/CMake/Basis/configure_script.cmake.in b/CMake/Basis/configure_script.cmake.in
+index 05bda68..6d47927 100644
+--- a/CMake/Basis/configure_script.cmake.in
++++ b/CMake/Basis/configure_script.cmake.in
+@@ -24,7 +24,7 @@
+ # -D CONFIGURATION=$<CONFIGURATION> CMake option with generator expression.
+ ##############################################################################
+ 
+-cmake_minimum_required (VERSION 2.8.12 FATAL_ERROR)
++cmake_minimum_required (VERSION 3.5 FATAL_ERROR)
+ 
+ include ("@BASIS_MODULE_PATH@/CommonTools.cmake") # basis_configure_script()
+ 
+diff --git a/CMake/Basis/generate_matlab_executable.cmake.in b/CMake/Basis/generate_matlab_executable.cmake.in
+index 4e3c5c3..4c92b0e 100644
+--- a/CMake/Basis/generate_matlab_executable.cmake.in
++++ b/CMake/Basis/generate_matlab_executable.cmake.in
+@@ -19,7 +19,7 @@
+ # such that the build command can be made dependent on the configured build script.
+ ##############################################################################
+ 
+-cmake_minimum_required (VERSION 2.8.12 FATAL_ERROR)
++cmake_minimum_required (VERSION 3.5 FATAL_ERROR)
+ 
+ include ("@BASIS_MODULE_PATH@/MatlabTools.cmake") # basis_generate_matlab_executable()
+                                                   # basis_write_addpaths_mfile()
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index db627e6..1bbc2bc 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -26,7 +26,7 @@
+ 
+ # ----------------------------------------------------------------------------
+ # Minimum required CMake version
+-cmake_minimum_required(VERSION 3.4 FATAL_ERROR)
++cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
+ 
+ # ----------------------------------------------------------------------------
+ # Include BASIS policies, settings, macros, and functions
+diff --git a/Templates/mirtk-module/1.0/CMakeLists.txt b/Templates/mirtk-module/1.0/CMakeLists.txt
+index e28d7e7..4fdaa89 100644
+--- a/Templates/mirtk-module/1.0/CMakeLists.txt
++++ b/Templates/mirtk-module/1.0/CMakeLists.txt
+@@ -16,7 +16,7 @@
+ # limitations under the License.
+ # ============================================================================
+ 
+-cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR)
++cmake_minimum_required (VERSION 3.5 FATAL_ERROR)
+ 
+ if (NOT COMMAND mirtk_configure_module)
+   find_package(MIRTK REQUIRED COMPONENTS CMake)

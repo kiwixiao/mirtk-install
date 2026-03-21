@@ -1,0 +1,52 @@
+{% set version = "2024.03.20" %}
+{% set git_rev = "master" %}
+
+package:
+  name: mirtk
+  version: {{ version }}
+
+source:
+  git_url: https://github.com/kiwixiao/MIRTK.git
+  git_rev: {{ git_rev }}
+  git_depth: -1
+
+build:
+  number: 0
+  skip: true  # [win]
+
+requirements:
+  build:
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+    - cmake >=3.14
+    - make                   # [unix]
+    - git
+  host:
+    - python
+    - eigen >=3.4
+    - vtk >=9.1
+    - tbb-devel
+    - boost-cpp
+    - libpng
+    - zlib
+  run:
+    - python
+    - vtk
+    - tbb
+    - boost-cpp
+    - libpng
+    - zlib
+
+test:
+  commands:
+    - mirtk help
+    - mirtk help info
+
+about:
+  home: https://github.com/BioMedIA/MIRTK
+  license: Apache-2.0
+  license_file: LICENSE.txt
+  summary: Medical Image Registration ToolKit
+  description: |
+    MIRTK is a research-focused image registration and processing toolkit
+    for medical imaging, supporting rigid, affine, and non-rigid registration.

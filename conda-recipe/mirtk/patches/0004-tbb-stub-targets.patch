@@ -1,0 +1,22 @@
+diff --git a/CMake/Modules/FindTBB.cmake b/CMake/Modules/FindTBB.cmake
+index 5f590e2..a1d69ae 100644
+--- a/CMake/Modules/FindTBB.cmake
++++ b/CMake/Modules/FindTBB.cmake
+@@ -540,6 +540,17 @@ if (NOT TBB_FIND_QUIETLY)
+   endif ()
+ endif ()
+ 
++# Create stub INTERFACE targets for tbbmalloc/tbbmalloc_proxy if not found,
++# to prevent conflicts when VTK's TBBConfig tries to define all targets.
++if (TBB_FOUND)
++  foreach (_TBB_STUB IN ITEMS TBB::tbbmalloc TBB::tbbmalloc_proxy)
++    if (NOT TARGET ${_TBB_STUB})
++      add_library(${_TBB_STUB} INTERFACE IMPORTED)
++    endif ()
++  endforeach ()
++  unset(_TBB_STUB)
++endif ()
++
+ # ------------------------------------------------------------------------------
+ # Unset local auxiliary variables
+ foreach (_TBB_COMPONENT IN ITEMS TBB MALLOC MALLOC_PROXY)
