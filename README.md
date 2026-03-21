@@ -5,7 +5,7 @@ Pre-built conda packages for [MIRTK](https://github.com/BioMedIA/MIRTK) (Medical
 ## Quick Install
 
 ```bash
-git clone https://github.com/xiaz9n/mirtk-install.git
+git clone https://github.com/kiwixiao/mirtk-install.git
 cd mirtk-install
 bash install.sh
 ```
@@ -27,8 +27,10 @@ mirtk transform-image --help
 
 ## Supported Platforms
 
-- macOS Apple Silicon (M1/M2/M3/M4) — `osx-arm64`
-- Linux x86_64 — `linux-64` (coming soon)
+| Platform | Status | Package |
+|----------|--------|---------|
+| macOS Apple Silicon (M1/M2/M3/M4) | Available | `packages/osx-arm64/` |
+| Linux x86_64 (Ubuntu, CentOS, etc.) | Coming soon | `packages/linux-64/` |
 
 ## Requirements
 
@@ -36,16 +38,15 @@ mirtk transform-image --help
 
 ## Building from Source
 
-If your platform is not listed above, you can build from source:
+If your platform is not listed above, you can build from source using the
+[MIRTK source repo](https://github.com/kiwixiao/MIRTK):
 
 ```bash
-git clone --recursive https://github.com/xiaz9n/MIRTK.git
+git clone --recursive https://github.com/kiwixiao/MIRTK.git
 cd MIRTK
 conda install conda-build -y
 conda build conda-recipe/mirtk --output-folder ~/conda-channel
 ```
-
-See `HOW_TO_BUILD.md` for details.
 
 ## What is MIRTK?
 
