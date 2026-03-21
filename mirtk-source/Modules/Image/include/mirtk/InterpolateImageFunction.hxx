@@ -38,14 +38,14 @@ namespace mirtk {
 
 // -----------------------------------------------------------------------------
 template <class TImage>
-inline GenericInterpolateImageFunction<TImage>
+GenericInterpolateImageFunction<TImage>
 ::GenericInterpolateImageFunction()
 {
 }
 
 // -----------------------------------------------------------------------------
 template <class TImage>
-inline GenericInterpolateImageFunction<TImage>
+GenericInterpolateImageFunction<TImage>
 ::~GenericInterpolateImageFunction()
 {
 }
@@ -73,7 +73,7 @@ GenericInterpolateImageFunction<TImage>
 
 // -----------------------------------------------------------------------------
 template <class TImage>
-inline void GenericInterpolateImageFunction<TImage>::Input(const BaseImage *input)
+void GenericInterpolateImageFunction<TImage>::Input(const BaseImage *input)
 {
   InterpolateImageFunction::Input(dynamic_cast<const TImage *>(input));
   if (input && !this->_Input) {
@@ -84,7 +84,7 @@ inline void GenericInterpolateImageFunction<TImage>::Input(const BaseImage *inpu
 
 // -----------------------------------------------------------------------------
 template <class TImage>
-inline void GenericInterpolateImageFunction<TImage>::Initialize(bool coeff)
+void GenericInterpolateImageFunction<TImage>::Initialize(bool coeff)
 {
   // Ensure that input has the right type
   if (!this->_Input) {
@@ -107,7 +107,7 @@ inline void GenericInterpolateImageFunction<TImage>::Initialize(bool coeff)
 
 // -----------------------------------------------------------------------------
 template <class TImage>
-inline void GenericInterpolateImageFunction<TImage>
+void GenericInterpolateImageFunction<TImage>
 ::Extrapolator(ExtrapolateImageFunction *input, bool owner)
 {
   InterpolateImageFunction::Extrapolator(input, owner);

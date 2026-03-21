@@ -7,6 +7,16 @@ rm -rf Build build
 mkdir -p build
 cd build
 
+# Platform-specific: enable Viewer (requires FLTK + OpenGL) on Linux only
+if [[ "$(uname)" == "Linux" ]]; then
+    VIEWER_FLAG=ON
+else
+    VIEWER_FLAG=OFF
+fi
+
+# GCC 15+ treats -Wchanges-meaning as error; suppress for this older codebase
+export CXXFLAGS="${CXXFLAGS:-} -Wno-changes-meaning"
+
 cmake ${CMAKE_ARGS} \
     -DCMAKE_INSTALL_PREFIX="${PREFIX}" \
     -DCMAKE_BUILD_TYPE=Release \
@@ -26,7 +36,7 @@ cmake ${CMAKE_ARGS} \
     -DMODULE_Deformable=ON \
     -DMODULE_Mapping=ON \
     -DMODULE_Scripting=ON \
-    -DMODULE_Viewer=OFF \
+    -DMODULE_Viewer=${VIEWER_FLAG} \
     -DMODULE_DrawEM=OFF \
     -DWITH_VTK=ON \
     -DWITH_TBB=ON \

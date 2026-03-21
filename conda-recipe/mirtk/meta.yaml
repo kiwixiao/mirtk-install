@@ -9,7 +9,7 @@ source:
   path: ../../mirtk-source
 
 build:
-  number: 0
+  number: 1
   skip: true  # [win]
 
 requirements:
@@ -27,6 +27,17 @@ requirements:
     - boost-cpp
     - libpng
     - zlib
+    - fltk                   # [linux]
+    - freeglut               # [linux]
+    - mesalib                # [linux]
+    - xorg-libx11            # [linux]
+    - xorg-libxext           # [linux]
+    - xorg-libxrender        # [linux]
+    - xorg-libxmu            # [linux]
+    - xorg-libxt             # [linux]
+    - xorg-libxfixes         # [linux]
+    - xorg-libxcursor        # [linux]
+    - xorg-libxinerama       # [linux]
   run:
     - python
     - vtk
@@ -34,6 +45,11 @@ requirements:
     - boost-cpp
     - libpng
     - zlib
+    - fltk                   # [linux]
+    - freeglut               # [linux]
+    - mesalib                # [linux]
+    - xorg-libx11            # [linux]
+    - xorg-libxext           # [linux]
 
 test:
   commands:
@@ -44,7 +60,8 @@ about:
   home: https://github.com/BioMedIA/MIRTK
   license: Apache-2.0
   license_file: LICENSE.txt
-  summary: Medical Image Registration ToolKit
+  summary: Medical Image Registration ToolKit (with Viewer)
   description: |
     MIRTK is a research-focused image registration and processing toolkit
     for medical imaging, supporting rigid, affine, and non-rigid registration.
+    This build includes the image viewer (iviewer) on Linux.
