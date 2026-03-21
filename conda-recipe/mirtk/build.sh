@@ -27,6 +27,7 @@ cmake ${CMAKE_ARGS} \
     -DMODULE_Mapping=ON \
     -DMODULE_Scripting=ON \
     -DMODULE_Viewer=ON \
+    -DFLTK_DIR="${PREFIX}/share/fltk" \
     -DMODULE_DrawEM=OFF \
     -DWITH_VTK=ON \
     -DWITH_TBB=ON \
