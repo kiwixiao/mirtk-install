@@ -307,23 +307,36 @@ run_registration() {
 
 apply_transforms() {
     local aligned_mask="$1"
+    local pids=()
 
-    info "Applying transforms to generate STLs (parallel)..."
+    info "Applying transforms to generate STLs (parallel, $((timePoints-1)) jobs)..."
     for i in $(seq 1 $(($timePoints-1))); do
-        if [ ! -f "seg_${i}.stl" ]; then
-            mirtk transform-points "seg_0.stl" "seg_${i}.stl" -dofin "ffd_${i}.dof.gz" &
-        fi
+        mirtk transform-points "seg_0.stl" "seg_${i}.stl" -dofin "ffd_${i}.dof.gz" &
+        pids+=($!)
     done
-    wait
-    info "All STL transforms complete"
+    # Wait for all and check for failures
+    local failed=0
+    for pid in "${pids[@]}"; do
+        wait "$pid" || failed=$((failed+1))
+    done
+    if [ "$failed" -gt 0 ]; then
+        error "$failed STL transform(s) failed"
+    fi
+    info "All $((timePoints-1)) STL transforms complete"
 
+    pids=()
     info "Generating binary masks (parallel)..."
     for i in $(seq 1 $(($timePoints-1))); do
-        if [ ! -f "seg_${i}.nii.gz" ]; then
-            mirtk extract-pointset-surface -input "seg_${i}.stl" -mask "seg_${i}.nii.gz" -reference "$aligned_mask" &
-        fi
+        mirtk extract-pointset-surface -input "seg_${i}.stl" -mask "seg_${i}.nii.gz" -reference "$aligned_mask" &
+        pids+=($!)
     done
-    wait
+    failed=0
+    for pid in "${pids[@]}"; do
+        wait "$pid" || failed=$((failed+1))
+    done
+    if [ "$failed" -gt 0 ]; then
+        error "$failed mask generation(s) failed"
+    fi
     info "All masks generated"
 }
 
