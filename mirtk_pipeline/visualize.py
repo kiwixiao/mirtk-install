@@ -27,10 +27,10 @@ def main():
         help="Output directory for frames and video (default: stl_dir/video_frames)",
     )
     parser.add_argument(
-        "--framerate",
+        "--duration",
         type=int,
         default=10,
-        help="Video framerate (default: 10)",
+        help="Target video duration in seconds (default: 10)",
     )
     parser.add_argument(
         "--no-video",
@@ -94,9 +94,11 @@ def main():
     if not args.no_video:
         video_parent = os.path.dirname(output_dir)
         video_path = os.path.join(video_parent, "stl_motion.mp4")
+        framerate = max(1, frame_count // args.duration)
+        print("Video: {} frames / {}s = {} fps".format(frame_count, args.duration, framerate))
         ffmpeg_cmd = [
             "ffmpeg", "-y",
-            "-framerate", str(args.framerate),
+            "-framerate", str(framerate),
             "-i", os.path.join(output_dir, "frame_%04d.png"),
             "-c:v", "libx264",
             "-pix_fmt", "yuv420p",
