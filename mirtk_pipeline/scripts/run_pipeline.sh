@@ -307,36 +307,21 @@ run_registration() {
 
 apply_transforms() {
     local aligned_mask="$1"
-    local pids=()
 
-    info "Applying transforms to generate STLs (parallel, $((timePoints-1)) jobs)..."
+    info "Applying transforms to generate STLs..."
     for i in $(seq 1 $(($timePoints-1))); do
-        mirtk transform-points "seg_0.stl" "seg_${i}.stl" -dofin "ffd_${i}.dof.gz" &
-        pids+=($!)
+        if [ ! -f "seg_${i}.stl" ]; then
+            mirtk transform-points "seg_0.stl" "seg_${i}.stl" -dofin "ffd_${i}.dof.gz"
+        fi
     done
-    # Wait for all and check for failures
-    local failed=0
-    for pid in "${pids[@]}"; do
-        wait "$pid" || failed=$((failed+1))
-    done
-    if [ "$failed" -gt 0 ]; then
-        error "$failed STL transform(s) failed"
-    fi
-    info "All $((timePoints-1)) STL transforms complete"
+    info "All STL transforms complete"
 
-    pids=()
-    info "Generating binary masks (parallel)..."
+    info "Generating binary masks..."
     for i in $(seq 1 $(($timePoints-1))); do
-        mirtk extract-pointset-surface -input "seg_${i}.stl" -mask "seg_${i}.nii.gz" -reference "$aligned_mask" &
-        pids+=($!)
+        if [ ! -f "seg_${i}.nii.gz" ]; then
+            mirtk extract-pointset-surface -input "seg_${i}.stl" -mask "seg_${i}.nii.gz" -reference "$aligned_mask"
+        fi
     done
-    failed=0
-    for pid in "${pids[@]}"; do
-        wait "$pid" || failed=$((failed+1))
-    done
-    if [ "$failed" -gt 0 ]; then
-        error "$failed mask generation(s) failed"
-    fi
     info "All masks generated"
 }
 
@@ -464,7 +449,7 @@ if [ -n "$opt_reuse_reg" ]; then
 
     # Clean previous propagation artifacts (safe to re-run)
     info "Cleaning previous propagation artifacts..."
-    rm -f seg_*.stl seg_*.nii.gz manual_seg.stl alignment.dof.gz out_*.stl *.csv
+    rm -f seg_*.stl seg_*.nii.gz manual_seg.stl alignment.dof.gz out_*.stl propagation_*.csv
 
     # Start logging
     exec > >(tee -a "$RESULTS_DIR/pipeline.log") 2>&1
