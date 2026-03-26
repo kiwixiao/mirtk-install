@@ -175,6 +175,7 @@ def write_mesh(mesh: vtkPolyData, path: str):
     writer = vtkSTLWriter()
     writer.SetFileName(path)
     writer.SetInputData(mesh)
+    writer.SetFileTypeToBinary()
     writer.Update()
 
 
