@@ -85,6 +85,7 @@ while [[ $# -gt 0 ]]; do
         --input-txt)    opt_input_txt="$2"; shift 2 ;;
         --config)       opt_config="$2"; shift 2 ;;
         --config-ct)    opt_config="$PIPELINE_DIR/config/register_ct.cfg"; shift ;;
+        --config-mri-large) opt_config="$PIPELINE_DIR/config/register_mri_large.cfg"; shift ;;
         --output-dir)   opt_output_dir="$2"; shift 2 ;;
         --manual-stl)   opt_manual_stl="$2"; shift 2 ;;
         --frames-dir)   opt_frames_dir="$2"; shift 2 ;;
@@ -117,6 +118,7 @@ while [[ $# -gt 0 ]]; do
             echo "  --input-txt FILE       Path to input.txt (default: ./input.txt)"
             echo "  --config FILE          Path to custom register.cfg"
             echo "  --config-ct            Use CT registration config (isotropic, all axes active)"
+            echo "  --config-mri-large     Use MRI config for large images (X frozen, 4 levels, downsampled)"
             echo "  --output-dir DIR       Output directory (overrides auto naming)"
             echo "  --reg-only             Registration only (no segmask needed, stops after FFDs)"
             echo "  --reuse-reg DIR        Reuse existing registration from DIR, propagate STL only"
@@ -586,13 +588,15 @@ downsample="${opt_downsample:-1}"
 if [ "$opt_config" = "$DEFAULT_CONFIG" ] && [ "$cli_mode" = false ]; then
     echo ""
     echo "Select registration config template:"
-    echo "  1) MRI  (cine MRI, few Z-slices, X-axis frozen)"
-    echo "  2) CT   (isotropic CT, all axes active, memory-efficient)"
-    echo "  3) Custom config file"
-    read -e -p "Choose [1/2/3]: " config_choice
+    echo "  1) MRI        (cine MRI, small images, X-axis frozen, full resolution)"
+    echo "  2) MRI-large  (large images, X-axis frozen, 4 levels, downsampled)"
+    echo "  3) CT         (isotropic CT, all axes active, memory-efficient)"
+    echo "  4) Custom config file"
+    read -e -p "Choose [1/2/3/4]: " config_choice
     case "$config_choice" in
-        2)  opt_config="$PIPELINE_DIR/config/register_ct.cfg" ;;
-        3)  read -e -p "Path to config file: " opt_config ;;
+        2)  opt_config="$PIPELINE_DIR/config/register_mri_large.cfg" ;;
+        3)  opt_config="$PIPELINE_DIR/config/register_ct.cfg" ;;
+        4)  read -e -p "Path to config file: " opt_config ;;
         *)  opt_config="$DEFAULT_CONFIG" ;;
     esac
 fi
