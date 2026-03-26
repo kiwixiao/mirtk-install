@@ -26,6 +26,27 @@ warnings.simplefilter(action="ignore", category=FutureWarning)
 use_mirtk_transform_points = True
 
 
+def farthest_point_sample(points, n_samples):
+    """Select n_samples points maximally spread across the surface via FPS.
+
+    Guarantees spatially-uniform coverage of the mesh surface.
+    Used for downsampling the star table while preserving shape representation.
+    """
+    n = points.shape[0]
+    if n_samples >= n:
+        return np.arange(n)
+    selected = np.zeros(n_samples, dtype=int)
+    distances = np.full(n, np.inf)
+    selected[0] = 0
+    for i in range(1, n_samples):
+        dist = np.linalg.norm(points - points[selected[i - 1]], axis=1)
+        distances = np.minimum(distances, dist)
+        selected[i] = np.argmax(distances)
+        if (i + 1) % 1000 == 0:
+            print("  FPS: {}/{} points selected".format(i + 1, n_samples))
+    return np.sort(selected)
+
+
 def rotation_matrix(target: sitk.Image) -> np.ndarray:
     """Image rotation matrix."""
     return np.array(target.GetDirection()).reshape(3, 3)
@@ -183,9 +204,9 @@ if __name__ == "__main__":
     parser.add_argument("--output-table", help="File path of output STAR table")
     parser.add_argument(
         "--downsample",
-        help="Keep every Nth vertex row to reduce table size (default: no downsampling)",
+        help="Number of spatially-uniform points to keep via FPS (0 = keep all, default: 5000)",
         type=int,
-        default=1,
+        default=5000,
     )
 
     args = parser.parse_args()
@@ -253,8 +274,10 @@ if __name__ == "__main__":
             columns["Y[t={}ms] (mm)".format(t)] = all_points[i, :, 1]
             columns["Z[t={}ms] (mm)".format(t)] = all_points[i, :, 2]
         table = pd.DataFrame(columns)
-        if args.downsample > 1:
-            table = table.iloc[::args.downsample]
+        if args.downsample > 0 and args.downsample < table.shape[0]:
+            print("FPS spatial downsampling: {} → {} points...".format(table.shape[0], args.downsample))
+            indices = farthest_point_sample(all_points[0], args.downsample)
+            table = table.iloc[indices]
         print("Write STAR table with shape", table.shape)
         table.to_csv(args.output_table, index=False, quoting=csv.QUOTE_NONNUMERIC)
 

@@ -345,7 +345,7 @@ run_interpolation() {
 
     info "Running cubic spline interpolation"
     local downsample_arg=""
-    if [ -n "$downsample" ] && [ "$downsample" -gt 1 ] 2>/dev/null; then
+    if [ -n "$downsample" ] && [ "$downsample" -gt 0 ] 2>/dev/null; then
         downsample_arg="--downsample $downsample"
     fi
 
@@ -422,7 +422,7 @@ if [ -n "$opt_reuse_reg" ]; then
     fi
 
     get_param "inteStep" "Please tell the interpolation step (ms): " "$opt_interp_step"
-    downsample="${opt_downsample:-1}"
+    downsample="${opt_downsample:-5000}"
 
     # Resolve paths
     SegMask="$(resolve_path "$SegMask")"
@@ -592,7 +592,7 @@ if [ "$opt_reg_only" != true ]; then
 fi
 
 # Downsample parameter (CLI only, no interactive prompt needed)
-downsample="${opt_downsample:-1}"
+downsample="${opt_downsample:-5000}"
 
 # Interactive config template selection (only if --config/--config-ct not given)
 if [ "$opt_config" = "$DEFAULT_CONFIG" ] && [ "$cli_mode" = false ]; then
