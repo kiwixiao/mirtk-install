@@ -310,17 +310,13 @@ apply_transforms() {
 
     info "Applying transforms to generate STLs..."
     for i in $(seq 1 $(($timePoints-1))); do
-        if [ ! -f "seg_${i}.stl" ]; then
-            mirtk transform-points "seg_0.stl" "seg_${i}.stl" -dofin "ffd_${i}.dof.gz"
-        fi
+        mirtk transform-points "seg_0.stl" "seg_${i}.stl" -dofin "ffd_${i}.dof.gz"
     done
     info "All STL transforms complete"
 
     info "Generating binary masks..."
     for i in $(seq 1 $(($timePoints-1))); do
-        if [ ! -f "seg_${i}.nii.gz" ]; then
-            mirtk extract-pointset-surface -input "seg_${i}.stl" -mask "seg_${i}.nii.gz" -reference "$aligned_mask"
-        fi
+        mirtk extract-pointset-surface -input "seg_${i}.stl" -mask "seg_${i}.nii.gz" -reference "$aligned_mask"
     done
     info "All masks generated"
 }
@@ -446,10 +442,6 @@ if [ -n "$opt_reuse_reg" ]; then
     cd "$reuse_dir"
     RESULTS_DIR="$(pwd)"
     info "Reusing registration from: $RESULTS_DIR"
-
-    # Clean previous propagation artifacts (safe to re-run)
-    info "Cleaning previous propagation artifacts..."
-    rm -f seg_*.stl seg_*.nii.gz manual_seg.stl alignment.dof.gz out_*.stl propagation_*.csv
 
     # Start logging
     exec > >(tee -a "$RESULTS_DIR/pipeline.log") 2>&1
