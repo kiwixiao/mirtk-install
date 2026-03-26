@@ -733,9 +733,6 @@ if [ -n "$opt_manual_stl" ]; then
     # CLI mode: explicit --manual-stl provided
     info "Using provided manual STL: $opt_manual_stl"
     cp "$opt_manual_stl" "$man_segSTL"
-elif [ "$cli_mode" = true ]; then
-    # CLI mode without --manual-stl: auto-generate from mask
-    extract_stl_from_mask "$SegMask" "$man_segSTL"
 else
     # Interactive mode: let the user choose
     if [ -f "$WORK_DIR/manual_seg.stl" ]; then
