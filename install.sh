@@ -52,17 +52,33 @@ else
     conda create -n "${ENV_NAME}" -c "file://${CHANNEL_DIR}" mirtk -y
 fi
 
-# --- Verify ---
-info "Verifying installation..."
-if conda run -n "${ENV_NAME}" mirtk help > /dev/null 2>&1; then
-    echo ""
-    info "MIRTK installed successfully!"
-    echo ""
-    echo "  To use:"
-    echo "    conda activate ${ENV_NAME}"
-    echo "    mirtk help"
-    echo "    mirtk help register"
-    echo ""
-else
+# --- Verify mirtk binary ---
+info "Verifying MIRTK installation..."
+if ! conda run -n "${ENV_NAME}" mirtk help > /dev/null 2>&1; then
     error "Installation failed. 'mirtk help' did not run successfully."
 fi
+info "MIRTK binary installed successfully."
+
+# --- Install Python dependencies for pipeline ---
+info "Installing Python dependencies (pyvista, trimesh, matplotlib, SimpleITK)..."
+conda run -n "${ENV_NAME}" pip install -q pyvista trimesh matplotlib SimpleITK 2>/dev/null || {
+    warn "Some pip packages may have failed. Check manually with: conda activate ${ENV_NAME} && pip list"
+}
+
+# --- Install pipeline commands ---
+PIPELINE_SETUP="${SCRIPT_DIR}/mirtk_pipeline/setup_commands.sh"
+if [ -f "$PIPELINE_SETUP" ]; then
+    info "Installing pipeline commands..."
+    conda run -n "${ENV_NAME}" bash "$PIPELINE_SETUP"
+else
+    warn "mirtk_pipeline/setup_commands.sh not found. Pipeline commands not installed."
+fi
+
+echo ""
+info "Installation complete!"
+echo ""
+echo "  To use:"
+echo "    conda activate ${ENV_NAME}"
+echo "    mirtk help"
+echo "    mirtk-pipeline --help"
+echo ""
