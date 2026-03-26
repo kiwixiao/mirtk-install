@@ -517,7 +517,7 @@ if [ -n "$opt_reuse_reg" ]; then
     # --- Stage 9: STL video generation (graceful if no ffmpeg/pyvista) ---
     if [ "$opt_skip_video" = false ]; then
         info "Generating STL motion video..."
-        python "$PIPELINE_DIR/visualize.py" "$RESULTS_DIR/interpolated_stls" --interval 5 --duration 10 || {
+        python "$PIPELINE_DIR/visualize.py" "$RESULTS_DIR/interpolated_stls" --interval 5 --duration 10 --csv "$RESULTS_DIR/$tableName" || {
             warn "Video generation failed (missing ffmpeg or pyvista?). Skipping."
         }
     fi
@@ -820,7 +820,7 @@ run_interpolation "$firstImageLink" "$alignedSTL" \
 
 if [ "$opt_skip_video" = false ]; then
     info "Generating STL motion video..."
-    python "$PIPELINE_DIR/visualize.py" "$RESULTS_DIR/interpolated_stls" --interval 5 --duration 10 || {
+    python "$PIPELINE_DIR/visualize.py" "$RESULTS_DIR/interpolated_stls" --interval 5 --duration 10 --csv "$RESULTS_DIR/$tableName" || {
         warn "Video generation failed (missing ffmpeg or pyvista?). Skipping."
     }
 else
