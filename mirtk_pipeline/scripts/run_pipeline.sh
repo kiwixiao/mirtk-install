@@ -449,6 +449,10 @@ if [ -n "$opt_reuse_reg" ]; then
     RESULTS_DIR="$(pwd)"
     info "Reusing registration from: $RESULTS_DIR"
 
+    # Clean previous propagation artifacts (safe to re-run)
+    info "Cleaning previous propagation artifacts..."
+    rm -f seg_*.stl seg_*.nii.gz manual_seg.stl alignment.dof.gz out_*.stl *.csv
+
     # Start logging
     exec > >(tee -a "$RESULTS_DIR/pipeline.log") 2>&1
     info "Logging to: $RESULTS_DIR/pipeline.log"
