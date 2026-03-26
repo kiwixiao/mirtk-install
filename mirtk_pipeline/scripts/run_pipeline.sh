@@ -224,12 +224,8 @@ create_symlinks() {
 extract_stl_from_mask() {
     local segmask="$1"
     local output_stl="$2"
-    if [ ! -f "$output_stl" ]; then
-        info "Extracting STL surface from segmentation mask"
-        mirtk extract-surface "$segmask" "$output_stl" -blur 0.8 -isovalue 0.4
-    else
-        warn "STL $output_stl already exists, skipping extraction"
-    fi
+    info "Extracting STL surface from segmentation mask"
+    mirtk extract-surface "$segmask" "$output_stl" -blur 0.8 -isovalue 0.4
 }
 
 perform_alignment() {
@@ -715,6 +711,9 @@ if [ "$opt_reg_only" = true ]; then
 
     # Stage 7: Generate ffds.csv
     generate_ffds_csv
+
+    # Copy input.txt into results folder for later --reuse-reg
+    cp "$opt_input_txt" "$RESULTS_DIR/input.txt" 2>/dev/null || true
 
     echo ""
     info "Registration-only mode complete!"
