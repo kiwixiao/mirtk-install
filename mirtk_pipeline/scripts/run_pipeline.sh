@@ -462,8 +462,6 @@ if [ -n "$opt_reuse_reg" ]; then
     if [ -n "$opt_manual_stl" ]; then
         info "Using provided manual STL: $opt_manual_stl"
         cp "$opt_manual_stl" "$man_segSTL"
-    elif [ "$cli_mode" = true ]; then
-        extract_stl_from_mask "$SegMask" "$man_segSTL"
     else
         # Interactive mode: let the user choose
         if [ -f "$WORK_DIR/manual_seg.stl" ]; then
