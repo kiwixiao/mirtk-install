@@ -512,6 +512,14 @@ if [ -n "$opt_reuse_reg" ]; then
     run_interpolation "$firstImageLink" "$alignedSTL" \
         "$tableName" "$inteStep" "$alignOrnot" "$BE_str" "$downsample"
 
+    # --- Stage 9: STL video generation (graceful if no ffmpeg/pyvista) ---
+    if [ "$opt_skip_video" = false ]; then
+        info "Generating STL motion video..."
+        python "$PIPELINE_DIR/visualize.py" "$RESULTS_DIR" --interval 5 --framerate 10 || {
+            warn "Video generation failed (missing ffmpeg or pyvista?). Skipping."
+        }
+    fi
+
     echo ""
     info "Propagation complete!"
     info "Results folder: $RESULTS_DIR"
@@ -805,21 +813,14 @@ run_interpolation "$firstImageLink" "$alignedSTL" \
     "$tableName" "$inteStep" "$alignOrnot" "$BE_str" "$downsample"
 
 # =============================================================================
-# Stage 6: Optional post-processing (video generation)
+# Stage 6: STL motion video generation
 # =============================================================================
 
 if [ "$opt_skip_video" = false ]; then
-    POST_PROCESS="$SCRIPT_DIR/post_process.sh"
-    if [ -f "$POST_PROCESS" ]; then
-        if command -v ffmpeg &> /dev/null; then
-            info "Running post-processing video generation"
-            bash "$POST_PROCESS" "." "." "$BE_str"
-        else
-            warn "ffmpeg not found. Skipping video generation."
-        fi
-    else
-        warn "post_process.sh not found. Skipping video generation."
-    fi
+    info "Generating STL motion video..."
+    python "$PIPELINE_DIR/visualize.py" "$RESULTS_DIR" --interval 5 --framerate 10 || {
+        warn "Video generation failed (missing ffmpeg or pyvista?). Skipping."
+    }
 else
     info "Video generation skipped (--skip-video)"
 fi
