@@ -486,8 +486,11 @@ if [ -n "$opt_reuse_reg" ]; then
         read -e -p "Choose [1/2/3]: " stl_choice
         case "$stl_choice" in
             2)
+                # cd to WORK_DIR so tab-completion finds STL files in subject folder
+                pushd "$WORK_DIR" > /dev/null
                 read -e -p "Path to STL file: " custom_stl_path
-                custom_stl_path="$(resolve_path "$custom_stl_path")"
+                popd > /dev/null
+                custom_stl_path="$(cd "$WORK_DIR" && resolve_path "$custom_stl_path")"
                 [ -f "$custom_stl_path" ] || error "STL file not found: $custom_stl_path"
                 info "Using: $custom_stl_path"
                 cp "$custom_stl_path" "$man_segSTL"
@@ -759,8 +762,11 @@ else
     read -e -p "Choose [1/2/3]: " stl_choice
     case "$stl_choice" in
         2)
+            # cd to WORK_DIR so tab-completion finds STL files in subject folder
+            pushd "$WORK_DIR" > /dev/null
             read -e -p "Path to STL file: " custom_stl_path
-            custom_stl_path="$(resolve_path "$custom_stl_path")"
+            popd > /dev/null
+            custom_stl_path="$(cd "$WORK_DIR" && resolve_path "$custom_stl_path")"
             [ -f "$custom_stl_path" ] || error "STL file not found: $custom_stl_path"
             info "Using: $custom_stl_path"
             cp "$custom_stl_path" "$man_segSTL"
