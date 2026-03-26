@@ -60,10 +60,11 @@ fi
 info "MIRTK binary installed successfully."
 
 # --- Install Python dependencies for pipeline ---
-info "Installing Python dependencies (pyvista, trimesh, matplotlib, SimpleITK)..."
-conda run -n "${ENV_NAME}" pip install -q pyvista trimesh matplotlib SimpleITK pandas scipy 2>/dev/null || {
+info "Installing Python dependencies..."
+conda run -n "${ENV_NAME}" pip install pyvista trimesh matplotlib SimpleITK pandas scipy numpy || {
     warn "Some pip packages may have failed. Check manually with: conda activate ${ENV_NAME} && pip list"
 }
+info "Python dependencies installed."
 
 # --- Install pipeline commands ---
 PIPELINE_SETUP="${SCRIPT_DIR}/mirtk_pipeline/setup_commands.sh"
