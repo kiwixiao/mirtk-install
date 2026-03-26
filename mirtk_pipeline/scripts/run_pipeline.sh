@@ -654,7 +654,7 @@ if [[ "$agn" == y* || "$agn" == Y* ]]; then
     auto_output_dir="${subject}_aligned_ds${DS}_l${L}_aBE${aBE}_be${be}"
     alignOrnot="aligned"
 else
-    auto_output_dir="${subject}_noalign_ds${DS}_be${be}"
+    auto_output_dir="${subject}_noalign_be${be}"
     alignOrnot="noalign"
 fi
 
