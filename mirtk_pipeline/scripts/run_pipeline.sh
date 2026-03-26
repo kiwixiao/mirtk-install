@@ -577,7 +577,11 @@ if [[ "$agn" == y* || "$agn" == Y* ]]; then
 fi
 
 get_param "be" "What is the bending energy for Motion Registration (default 0.001): " "$opt_motion_be"
-get_param "inteStep" "Please tell the interpolation step (ms): " "$opt_interp_step"
+
+# Only ask interpolation params if not reg-only (they're not used during registration)
+if [ "$opt_reg_only" != true ]; then
+    get_param "inteStep" "Please tell the interpolation step (ms): " "$opt_interp_step"
+fi
 
 # Downsample parameter (CLI only, no interactive prompt needed)
 downsample="${opt_downsample:-1}"
