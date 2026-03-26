@@ -349,6 +349,8 @@ run_interpolation() {
         downsample_arg="--downsample $downsample"
     fi
 
+    mkdir -p interpolated_stls
+
     python "$PIPELINE_DIR/interpolate.py" \
         --target "$first_image" \
         --dofs ffds.csv \
@@ -356,7 +358,7 @@ run_interpolation() {
         --start 0 \
         --stop "$timeEnd" \
         --step "$interp_step" \
-        --output-mesh "./out_{t:08.3f}_${align_or_not}_${be_str}.stl" \
+        --output-mesh "./interpolated_stls/out_{t:08.3f}_${align_or_not}_${be_str}.stl" \
         --output-table "./${table_name}" \
         $downsample_arg
 }
@@ -515,7 +517,7 @@ if [ -n "$opt_reuse_reg" ]; then
     # --- Stage 9: STL video generation (graceful if no ffmpeg/pyvista) ---
     if [ "$opt_skip_video" = false ]; then
         info "Generating STL motion video..."
-        python "$PIPELINE_DIR/visualize.py" "$RESULTS_DIR" --interval 5 --framerate 10 || {
+        python "$PIPELINE_DIR/visualize.py" "$RESULTS_DIR/interpolated_stls" --interval 5 --framerate 10 || {
             warn "Video generation failed (missing ffmpeg or pyvista?). Skipping."
         }
     fi
@@ -818,7 +820,7 @@ run_interpolation "$firstImageLink" "$alignedSTL" \
 
 if [ "$opt_skip_video" = false ]; then
     info "Generating STL motion video..."
-    python "$PIPELINE_DIR/visualize.py" "$RESULTS_DIR" --interval 5 --framerate 10 || {
+    python "$PIPELINE_DIR/visualize.py" "$RESULTS_DIR/interpolated_stls" --interval 5 --framerate 10 || {
         warn "Video generation failed (missing ffmpeg or pyvista?). Skipping."
     }
 else

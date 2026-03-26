@@ -57,8 +57,9 @@ def main():
         tf, args.interval, len(range(0, tf, args.interval))
     ))
 
-    # Create output directory
-    output_dir = args.output_dir or os.path.join(args.stl_dir, "video_frames")
+    # Create output directory (video_frames at parent level, not inside stl_dir)
+    results_root = os.path.dirname(args.stl_dir) or "."
+    output_dir = args.output_dir or os.path.join(results_root, "video_frames")
     os.makedirs(output_dir, exist_ok=True)
 
     pv.set_plot_theme("document")
