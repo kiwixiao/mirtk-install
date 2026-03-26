@@ -9,6 +9,7 @@ import pandas as pd
 import scipy.ndimage
 import scipy.interpolate
 import SimpleITK as sitk
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from subprocess import check_call
 from tempfile import mkstemp
 from typing import Optional
@@ -199,62 +200,67 @@ if __name__ == "__main__":
             dofs.append((str(Path(row["dof"])), float(row["t"])))
     dofs = sorted(dofs, key=lambda item: item[1])
 
-    time_points = []
-    mesh_points = []
-    for i, dof in enumerate(dofs):
-        if use_mirtk_transform_points:
-            fp, path = mkstemp(suffix=".stl")
-        else:
-            fp, path = mkstemp(suffix=".nii.gz")
+    # --- Parallel DOF loading ---
+    def load_dof_points(dof):
+        """Load mesh points for a single DOF (thread-safe)."""
+        t_val = float(dof[1])
+        if dof[0] in ("id", "Id", "identity"):
+            return t_val, vtk_to_numpy(initial_mesh.GetPoints().GetData())
+        fp, tmp_path = mkstemp(suffix=".stl")
         os.close(fp)
         try:
-            print("Deforming initial mesh to t={} by {}".format(dof[1], dof[0]))
-            time_points.append(float(dof[1]))
-            if dof[0] in ("id", "Id", "identity"):
-                mesh = initial_mesh
-            else:
-                if use_mirtk_transform_points:
-                    check_call(
-                        ["mirtk", "transform-points", args.mesh, path, "-dofin", dof[0]]
-                    )
-                    mesh = read_mesh(path)
-                else:
-                    check_call(
-                        ["mirtk", "convert-dof", dof[0], path, "-target", args.target]
-                    )
-                    mesh = deform_mesh(initial_mesh, disp_field=sitk.ReadImage(path))
+            check_call(
+                ["mirtk", "transform-points", args.mesh, tmp_path, "-dofin", dof[0]]
+            )
+            mesh = read_mesh(tmp_path)
             points = vtk_to_numpy(mesh.GetPoints().GetData())
-            assert points.ndim == 2, "points.shape={}".format(points.shape)
-            assert points.shape[0] > 0, "points.shape={}".format(points.shape)
-            assert points.shape[1] == 3, "points.shape={}".format(points.shape)
-            mesh_points.append(points)
+            assert points.ndim == 2 and points.shape[1] == 3
+            return t_val, points
         finally:
-            os.remove(path)
-    mesh_points = np.stack(mesh_points, axis=0)
+            os.remove(tmp_path)
+
+    n_workers = min(len(dofs), os.cpu_count() or 1)
+    print("Loading {} DOFs in parallel ({} workers)...".format(len(dofs), n_workers))
+    results = []
+    with ThreadPoolExecutor(max_workers=n_workers) as pool:
+        futures = {pool.submit(load_dof_points, d): d for d in dofs}
+        for f in as_completed(futures):
+            t_val, pts = f.result()
+            results.append((t_val, pts))
+            print("  Loaded t={}".format(t_val))
+
+    # Sort by time after parallel collection
+    results.sort(key=lambda x: x[0])
+    time_points = [r[0] for r in results]
+    mesh_points = np.stack([r[1] for r in results], axis=0)
+
+    # --- Vectorized interpolation ---
     mesh_points_interpolator = scipy.interpolate.interp1d(
         time_points, mesh_points, axis=0, bounds_error=True,
         assume_sorted=True, kind='cubic'
     )
-    tables = []
     ts = np.arange(args.start, args.stop + args.step, args.step)
-    for i, t in enumerate(ts):
-        points = mesh_points_interpolator(t)
-        if args.output_table:
-            tables.append(
-                pd.DataFrame(
-                    {
-                        "X[t={}ms] (mm)".format(t): points[:, 0],
-                        "Y[t={}ms] (mm)".format(t): points[:, 1],
-                        "Z[t={}ms] (mm)".format(t): points[:, 2],
-                    }
-                )
-            )
-        if args.output_mesh:
-            mesh = replace_mesh_points(initial_mesh, points)
-            write_mesh(mesh, args.output_mesh.format(i=i, t=t))
+
+    # Evaluate all time points at once (vectorized)
+    print("Interpolating {} time steps...".format(len(ts)))
+    all_points = mesh_points_interpolator(ts)  # shape: (len(ts), N_vertices, 3)
+
+    # Write star table (vectorized, no pd.concat)
     if args.output_table:
-        table = pd.concat(tables, axis=1)
+        columns = {}
+        for i, t in enumerate(ts):
+            columns["X[t={}ms] (mm)".format(t)] = all_points[i, :, 0]
+            columns["Y[t={}ms] (mm)".format(t)] = all_points[i, :, 1]
+            columns["Z[t={}ms] (mm)".format(t)] = all_points[i, :, 2]
+        table = pd.DataFrame(columns)
         if args.downsample > 1:
             table = table.iloc[::args.downsample]
         print("Write STAR table with shape", table.shape)
         table.to_csv(args.output_table, index=False, quoting=csv.QUOTE_NONNUMERIC)
+
+    # Write interpolated STL meshes
+    if args.output_mesh:
+        print("Writing {} STL meshes...".format(len(ts)))
+        for i, t in enumerate(ts):
+            mesh = replace_mesh_points(initial_mesh, all_points[i])
+            write_mesh(mesh, args.output_mesh.format(i=i, t=t))

@@ -308,18 +308,23 @@ run_registration() {
 apply_transforms() {
     local aligned_mask="$1"
 
-    info "Applying transforms to generate STLs and masks for all time points"
+    info "Applying transforms to generate STLs (parallel)..."
     for i in $(seq 1 $(($timePoints-1))); do
         if [ ! -f "seg_${i}.stl" ]; then
-            mirtk transform-points "seg_0.stl" "seg_${i}.stl" -dofin "ffd_${i}.dof.gz"
+            mirtk transform-points "seg_0.stl" "seg_${i}.stl" -dofin "ffd_${i}.dof.gz" &
         fi
     done
+    wait
+    info "All STL transforms complete"
 
+    info "Generating binary masks (parallel)..."
     for i in $(seq 1 $(($timePoints-1))); do
         if [ ! -f "seg_${i}.nii.gz" ]; then
-            mirtk extract-pointset-surface -input "seg_${i}.stl" -mask "seg_${i}.nii.gz" -reference "$aligned_mask"
+            mirtk extract-pointset-surface -input "seg_${i}.stl" -mask "seg_${i}.nii.gz" -reference "$aligned_mask" &
         fi
     done
+    wait
+    info "All masks generated"
 }
 
 generate_ffds_csv() {
