@@ -89,9 +89,10 @@ def main():
 
     print("Generated {} PNG frames in: {}".format(frame_count, output_dir))
 
-    # Generate MP4 video
+    # Generate MP4 video (saved in parent of frames dir, not inside frames)
     if not args.no_video:
-        video_path = os.path.join(output_dir, "stl_motion.mp4")
+        video_parent = os.path.dirname(output_dir)
+        video_path = os.path.join(video_parent, "stl_motion.mp4")
         ffmpeg_cmd = [
             "ffmpeg", "-y",
             "-framerate", str(args.framerate),
