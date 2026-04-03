@@ -41,6 +41,10 @@ requirements:
     - libpng
     - zlib
     - fltk
+    - shapely
+    - rtree
+    - networkx
+    - mapbox_earcut
 
 test:
   commands:

@@ -78,6 +78,7 @@ while [[ $# -gt 0 ]]; do
         --ds)           opt_ds="$2"; shift 2 ;;
         --levels)       opt_levels="$2"; shift 2 ;;
         --align-be)     opt_align_be="$2"; shift 2 ;;
+        --align-mode)   opt_align_mode="$2"; shift 2 ;;
         --initial)      opt_initial="$2"; shift 2 ;;
         --motion-be)    opt_motion_be="$2"; shift 2 ;;
         --interp-step)  opt_interp_step="$2"; shift 2 ;;
@@ -238,16 +239,24 @@ perform_alignment() {
     local aligned_mask="$5"
     local alignment_dof="$6"
     local initial="$7"
-    local ds="$8"
-    local levels="$9"
-    local align_be="${10}"
+    local align_mode="$8"       # "config" or "manual"
+    local align_config="$9"     # config file path (used when mode=config)
+    local ds="${10}"             # used when mode=manual
+    local levels="${11}"         # used when mode=manual
+    local align_be="${12}"       # used when mode=manual
 
     # Register static image to first time point
     if [ ! -f "$alignment_dof" ]; then
         info "Registering static image to time-zero frame"
-        mirtk register "$static_image" "$first_image" -model Rigid+Affine+FFD \
-            -dofin "$initial" -dofout "$alignment_dof" \
-            -ds "$ds" -levels "$levels" -be "$align_be" -sim NMI
+        if [ "$align_mode" = "config" ]; then
+            mirtk register "$static_image" "$first_image" -model Rigid+Affine+FFD \
+                -dofin "$initial" -dofout "$alignment_dof" \
+                -parin "$align_config"
+        else
+            mirtk register "$static_image" "$first_image" -model Rigid+Affine+FFD \
+                -dofin "$initial" -dofout "$alignment_dof" \
+                -ds "$ds" -levels "$levels" -be "$align_be" -sim NMI
+        fi
     else
         warn "Alignment DOF already exists, skipping"
     fi
@@ -328,7 +337,6 @@ identity,0" > ffds.csv
             local t=$(($i*$dt))
             echo "ffd_${i}.dof.gz,${t}" >> ffds.csv
         done
-        echo "identity,$(($timeEnd+$dt))" >> ffds.csv
     else
         warn "ffds.csv already exists, skipping"
     fi
@@ -502,7 +510,7 @@ if [ -n "$opt_reuse_reg" ]; then
     if [[ "$agn" == y* || "$agn" == Y* ]]; then
         perform_alignment "$StaticImage" "$firstImageLink" "$man_segSTL" \
             "$alignedSTL" "$alignedMask" "alignment.dof.gz" \
-            "$initial" "$DS" "$L" "$aBE"
+            "$initial" "$align_mode" "./register_work.cfg" "$DS" "$L" "$aBE"
     else
         skip_alignment "$man_segSTL" "$SegMask" "$alignedSTL" "$alignedMask"
     fi
@@ -571,17 +579,37 @@ parse_input_txt "$opt_input_txt"
 
 get_param "subject" "What is the project and subject name: " "$opt_subject"
 
-# B6 fix: default DS to 1 always
+# Alignment parameters
 DS="1"
 L=""
 aBE=""
 initial=""
+align_mode="manual"
 
 if [[ "$agn" == y* || "$agn" == Y* ]]; then
-    get_param "DS" "Please say the alignment ds in range 1 to 10: " "$opt_ds"
-    get_param "L" "Please say the alignment levels choose 2 or 4: " "$opt_levels"
-    get_param "aBE" "Please say the alignment bending energy (default 0.001): " "$opt_align_be"
     get_param "initial" "Please say the initial alignment (Id, guess, or dof.gz): " "$opt_initial"
+    if [ -n "$opt_align_mode" ]; then
+        align_mode="$opt_align_mode"
+        if [ "$align_mode" = "manual" ]; then
+            get_param "DS" "Please say the alignment ds in range 1 to 10: " "$opt_ds"
+            get_param "L" "Please say the alignment levels choose 2 or 4: " "$opt_levels"
+            get_param "aBE" "Please say the alignment bending energy (default 0.001): " "$opt_align_be"
+        fi
+    else
+        echo ""
+        echo "Alignment registration parameters:"
+        echo "  1) Use same config as pairwise registration"
+        echo "  2) Manual input (ds, levels, bending energy)"
+        read -e -p "Select [1/2]: " align_choice
+        case "$align_choice" in
+            1)  align_mode="config" ;;
+            *)  align_mode="manual"
+                get_param "DS" "Please say the alignment ds in range 1 to 10: " "$opt_ds"
+                get_param "L" "Please say the alignment levels choose 2 or 4: " "$opt_levels"
+                get_param "aBE" "Please say the alignment bending energy (default 0.001): " "$opt_align_be"
+                ;;
+        esac
+    fi
 fi
 
 get_param "be" "What is the bending energy for Motion Registration (default 0.001): " "$opt_motion_be"
@@ -651,9 +679,17 @@ opt_config="$(resolve_path "$opt_config")"
 # =============================================================================
 
 if [[ "$agn" == y* || "$agn" == Y* ]]; then
-    auto_output_dir="${subject}_aligned_ds${DS}_l${L}_aBE${aBE}_be${be}"
     alignOrnot="aligned"
+    if [ "$align_mode" = "config" ]; then
+        # Extract config name from filename (e.g. register_mri_large.cfg -> mri_large)
+        align_config_name=$(basename "$opt_config" .cfg | sed 's/^register_//')
+        align_tag="cfg_${align_config_name}"
+    else
+        align_tag="ds${DS}_l${L}_aBE${aBE}"
+    fi
+    auto_output_dir="${subject}_aligned_${align_tag}_be${be}"
 else
+    align_tag=""
     auto_output_dir="${subject}_noalign_be${be}"
     alignOrnot="noalign"
 fi
@@ -661,7 +697,7 @@ fi
 output_dir="${opt_output_dir:-$auto_output_dir}"
 tableName="${output_dir}.csv"
 
-BE_str="ds${DS}_l${L}_aBE${aBE}_be${be}"
+BE_str="${align_tag:+${align_tag}_}be${be}"
 
 alignedSTL="seg_0.stl"
 alignedMask="seg_0.nii.gz"
@@ -788,7 +824,7 @@ fi
 if [[ "$agn" == y* || "$agn" == Y* ]]; then
     perform_alignment "$StaticImage" "$firstImageLink" "$man_segSTL" \
         "$alignedSTL" "$alignedMask" "alignment.dof.gz" \
-        "$initial" "$DS" "$L" "$aBE"
+        "$initial" "$align_mode" "./register_work.cfg" "$DS" "$L" "$aBE"
 else
     skip_alignment "$man_segSTL" "$SegMask" "$alignedSTL" "$alignedMask"
 fi
