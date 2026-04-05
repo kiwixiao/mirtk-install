@@ -25,8 +25,13 @@ if [ -z "${CONDA_PREFIX:-}" ]; then
     error "No conda env active. Run: conda activate mirtk"
 fi
 
-PIPELINE_DIR="$(cd "$(dirname "$0")" && pwd)"
+SOURCE_DIR="$(cd "$(dirname "$0")" && pwd)"
+PIPELINE_DIR="$CONDA_PREFIX/share/mirtk_pipeline"
 BIN_DIR="$CONDA_PREFIX/bin"
+
+info "Copying pipeline into conda env: $PIPELINE_DIR"
+rm -rf "$PIPELINE_DIR"
+cp -r "$SOURCE_DIR" "$PIPELINE_DIR"
 
 info "Installing commands into: $BIN_DIR"
 
