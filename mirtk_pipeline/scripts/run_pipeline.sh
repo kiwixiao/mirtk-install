@@ -395,6 +395,17 @@ else
 fi
 echo ""
 
+# --- Ask about CSA prepare-slicer at the end ---
+opt_prepare_slicer=false
+if command -v mirtk-prepare-slicer &> /dev/null; then
+    read -e -p "$(echo -e "${GREEN}[INFO]${NC}") Run prepare-slicer for CSA pipeline after completion? [y/N]: " run_prepare
+    if [[ "$run_prepare" =~ ^[Yy]$ ]]; then
+        opt_prepare_slicer=true
+        info "Will run prepare-slicer after pipeline completes."
+    fi
+    echo ""
+fi
+
 # =============================================================================
 # --reuse-reg: Skip to propagation using existing results
 # =============================================================================
@@ -875,16 +886,15 @@ info "Config used:    $RESULTS_DIR/register_work.cfg"
 info "Pipeline log:   $RESULTS_DIR/pipeline.log"
 
 # =============================================================================
-# Stage 7: Prepare for CSA slicer (optional)
+# Stage 7: Prepare for CSA slicer (if opted in)
 # =============================================================================
 
-if command -v mirtk-prepare-slicer &> /dev/null; then
+if [ "$opt_prepare_slicer" = true ]; then
     echo ""
-    read -e -p "$(echo -e "${GREEN}[INFO]${NC}") Run prepare-slicer for CSA pipeline? [y/N]: " run_prepare
-    if [[ "$run_prepare" =~ ^[Yy]$ ]]; then
-        info "Running prepare-slicer..."
-        mirtk-prepare-slicer --reg-dir "$RESULTS_DIR"
-    else
-        info "Skipped. Run later with: mirtk-prepare-slicer --reg-dir $RESULTS_DIR"
+    info "Running prepare-slicer..."
+    mirtk-prepare-slicer --reg-dir "$RESULTS_DIR"
+else
+    if command -v mirtk-prepare-slicer &> /dev/null; then
+        info "To prepare for CSA: mirtk-prepare-slicer --reg-dir $RESULTS_DIR"
     fi
 fi
