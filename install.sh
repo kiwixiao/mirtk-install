@@ -66,6 +66,13 @@ conda run -n "${ENV_NAME}" pip install pyvista trimesh matplotlib SimpleITK pand
 }
 info "Python dependencies installed."
 
+# --- Install CSA slicer package ---
+info "Installing CSA slicer (cross-sectional area analysis)..."
+conda run -n "${ENV_NAME}" pip install "csa-slicer @ git+https://github.com/kiwixiao/csa.git#subdirectory=python_slicer" || {
+    warn "CSA slicer install failed. Install manually with: pip install 'csa-slicer @ git+https://github.com/kiwixiao/csa.git#subdirectory=python_slicer'"
+}
+info "CSA slicer installed."
+
 # --- Install pipeline commands ---
 PIPELINE_SETUP="${SCRIPT_DIR}/mirtk_pipeline/setup_commands.sh"
 if [ -f "$PIPELINE_SETUP" ]; then
@@ -82,4 +89,7 @@ echo "  To use:"
 echo "    conda activate ${ENV_NAME}"
 echo "    mirtk help"
 echo "    mirtk-pipeline --help"
+echo "    csa-pipeline --help"
+echo "    csa-bifurcation --help"
+echo "    csa-aortic --help"
 echo ""
