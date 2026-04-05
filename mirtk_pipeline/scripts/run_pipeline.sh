@@ -873,3 +873,18 @@ info "Results folder: $RESULTS_DIR"
 info "Star table:     $RESULTS_DIR/$tableName"
 info "Config used:    $RESULTS_DIR/register_work.cfg"
 info "Pipeline log:   $RESULTS_DIR/pipeline.log"
+
+# =============================================================================
+# Stage 7: Prepare for CSA slicer (optional)
+# =============================================================================
+
+if command -v mirtk-prepare-slicer &> /dev/null; then
+    echo ""
+    read -e -p "$(echo -e "${GREEN}[INFO]${NC}") Run prepare-slicer for CSA pipeline? [y/N]: " run_prepare
+    if [[ "$run_prepare" =~ ^[Yy]$ ]]; then
+        info "Running prepare-slicer..."
+        mirtk-prepare-slicer --reg-dir "$RESULTS_DIR"
+    else
+        info "Skipped. Run later with: mirtk-prepare-slicer --reg-dir $RESULTS_DIR"
+    fi
+fi
