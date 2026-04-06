@@ -179,7 +179,7 @@ def write_mesh(mesh: vtkPolyData, path: str):
     writer.Update()
 
 
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--target", help="Target image, i.e., first time point", required=True
@@ -288,3 +288,7 @@ if __name__ == "__main__":
         for i, t in enumerate(ts):
             mesh = replace_mesh_points(initial_mesh, all_points[i])
             write_mesh(mesh, args.output_mesh.format(i=i, t=t))
+
+
+if __name__ == "__main__":
+    main()

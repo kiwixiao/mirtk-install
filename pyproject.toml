@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mirtk-pipeline"
+version = "1.0.0"
+description = "MIRTK registration pipeline for medical image analysis"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy",
+    "scipy",
+    "pandas",
+    "matplotlib",
+    "pyvista",
+    "trimesh",
+    "SimpleITK",
+]
+
+[project.scripts]
+mirtk-pipeline = "mirtk_pipeline.run_pipeline:main"
+mirtk-prepare-slicer = "mirtk_pipeline.prepare_slicer:main"
+mirtk-postprocess = "mirtk_pipeline.post_process:main"
+mirtk-register-seq = "mirtk_pipeline.register:main"
+mirtk-interpolate = "mirtk_pipeline.interpolate:main"
+mirtk-decimate = "mirtk_pipeline.decimate:main"
+mirtk-scale-stl = "mirtk_pipeline.scale_stl:main"
+mirtk-preprocess = "mirtk_pipeline.preprocess:main"
+mirtk-visualize = "mirtk_pipeline.visualize:main"
+mirtk-nifti-slices = "mirtk_pipeline.nifti_to_slices:main"
+
+[tool.setuptools]
+packages = ["mirtk_pipeline"]
+
+[tool.setuptools.package-data]
+mirtk_pipeline = ["config/*.cfg"]

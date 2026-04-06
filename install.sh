@@ -59,12 +59,12 @@ if ! conda run -n "${ENV_NAME}" mirtk help > /dev/null 2>&1; then
 fi
 info "MIRTK binary installed successfully."
 
-# --- Install Python dependencies for pipeline ---
-info "Installing Python dependencies..."
-conda run -n "${ENV_NAME}" pip install pyvista trimesh matplotlib SimpleITK pandas scipy numpy || {
-    warn "Some pip packages may have failed. Check manually with: conda activate ${ENV_NAME} && pip list"
+# --- Install MIRTK pipeline (Python package) ---
+info "Installing MIRTK pipeline package..."
+conda run -n "${ENV_NAME}" pip install "${SCRIPT_DIR}" || {
+    error "MIRTK pipeline install failed."
 }
-info "Python dependencies installed."
+info "MIRTK pipeline installed."
 
 # --- Install CSA slicer package ---
 info "Installing CSA slicer (cross-sectional area analysis)..."
@@ -72,15 +72,6 @@ conda run -n "${ENV_NAME}" pip install "csa-slicer @ git+https://github.com/kiwi
     warn "CSA slicer install failed. Install manually with: pip install 'csa-slicer @ git+https://github.com/kiwixiao/csa.git#subdirectory=python_slicer'"
 }
 info "CSA slicer installed."
-
-# --- Install pipeline commands ---
-PIPELINE_SETUP="${SCRIPT_DIR}/mirtk_pipeline/setup_commands.sh"
-if [ -f "$PIPELINE_SETUP" ]; then
-    info "Installing pipeline commands..."
-    conda run -n "${ENV_NAME}" bash "$PIPELINE_SETUP"
-else
-    warn "mirtk_pipeline/setup_commands.sh not found. Pipeline commands not installed."
-fi
 
 echo ""
 info "Installation complete!"
