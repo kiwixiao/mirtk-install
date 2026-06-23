@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# PYTHON_ARGCOMPLETE_OK
 
 import argparse
 import pyvista as pv
@@ -19,6 +20,11 @@ def main():
         "--output",
         help="Output file path (default: input_decimated.stl)",
     )
+    try:
+        import argcomplete
+        argcomplete.autocomplete(parser)
+    except ImportError:
+        pass
     args = parser.parse_args()
 
     mesh = pv.read(args.input_file)

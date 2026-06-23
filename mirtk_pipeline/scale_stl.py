@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# PYTHON_ARGCOMPLETE_OK
 
 import trimesh
 import argparse
@@ -20,6 +21,11 @@ def main():
         "--output",
         help="Output file path (default: input_Scaled.stl)",
     )
+    try:
+        import argcomplete
+        argcomplete.autocomplete(parser)
+    except ImportError:
+        pass
     args = parser.parse_args()
 
     mesh = trimesh.load_mesh(args.input_file)

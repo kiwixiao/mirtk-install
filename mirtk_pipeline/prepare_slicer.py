@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# PYTHON_ARGCOMPLETE_OK
 """Prepare registration output for CSA pipeline.
 
 Creates a subject folder with registration/, surface/, and motion/ subfolders.
@@ -238,11 +239,20 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         action="store_true",
         help="Show what would be done without copying",
     )
+    try:
+        import argcomplete
+        argcomplete.autocomplete(p)
+    except ImportError:
+        pass
     return p.parse_args(argv)
 
 
 def main(argv: list[str] | None = None) -> int:
     """Entry point."""
+    # Enable Tab completion of file/dir paths at interactive input() prompts.
+    from mirtk_pipeline._completion import enable_path_completion
+    enable_path_completion()
+
     args = parse_args(argv)
     cwd = Path.cwd()
 

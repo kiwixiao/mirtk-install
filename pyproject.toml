@@ -15,6 +15,7 @@ dependencies = [
     "pyvista",
     "trimesh",
     "SimpleITK",
+    "argcomplete",
 ]
 
 [project.scripts]

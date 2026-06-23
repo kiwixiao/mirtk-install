@@ -1,2 +1,8 @@
 .cache/
 *.db
+
+# Python build artifacts
+build/
+*.egg-info/
+__pycache__/
+*.py[cod]

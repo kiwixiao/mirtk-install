@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# PYTHON_ARGCOMPLETE_OK
 """
 MIRTK Registration Pipeline - Dual Mode (Interactive / CLI)
 
@@ -408,7 +409,16 @@ def main():
     # Detect CLI mode: any args beyond the script name
     cli_mode = len(sys.argv) > 1
 
+    # Enable Tab completion of file/dir paths at interactive input() prompts.
+    from mirtk_pipeline._completion import enable_path_completion
+    enable_path_completion()
+
     parser = build_parser()
+    try:
+        import argcomplete
+        argcomplete.autocomplete(parser)
+    except ImportError:
+        pass
     args = parser.parse_args()
 
     # Handle config shortcut flags

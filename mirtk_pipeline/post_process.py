@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# PYTHON_ARGCOMPLETE_OK
 
 """Post-processing: generate QC videos from registration output.
 
@@ -193,6 +194,11 @@ def main():
         default="video",
         help="Name of the video output subdirectory (default: video)",
     )
+    try:
+        import argcomplete
+        argcomplete.autocomplete(parser)
+    except ImportError:
+        pass
     args = parser.parse_args()
 
     # Shell script treats "." same as default

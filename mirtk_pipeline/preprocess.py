@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# PYTHON_ARGCOMPLETE_OK
 
 import argparse
 
@@ -13,6 +14,11 @@ def main():
     parser.add_argument("--conductance", type=float, default=2.0)
     parser.add_argument("--iterations", type=int, default=15)
 
+    try:
+        import argcomplete
+        argcomplete.autocomplete(parser)
+    except ImportError:
+        pass
     argv = parser.parse_args()
 
     img = sitk.ReadImage(argv.input)

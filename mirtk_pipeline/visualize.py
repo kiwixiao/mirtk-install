@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# PYTHON_ARGCOMPLETE_OK
 
 import pyvista as pv
 import argparse
@@ -178,6 +179,11 @@ def main():
         action="store_true",
         help="Skip MP4 video generation (PNGs only)",
     )
+    try:
+        import argcomplete
+        argcomplete.autocomplete(parser)
+    except ImportError:
+        pass
     args = parser.parse_args()
 
     results_root = os.path.dirname(args.stl_dir) or "."

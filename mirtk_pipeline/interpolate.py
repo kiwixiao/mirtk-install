@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# PYTHON_ARGCOMPLETE_OK
 
 import argparse
 import csv
@@ -210,6 +211,11 @@ def main():
         default=5000,
     )
 
+    try:
+        import argcomplete
+        argcomplete.autocomplete(parser)
+    except ImportError:
+        pass
     args = parser.parse_args()
 
     initial_mesh = read_mesh(args.mesh)

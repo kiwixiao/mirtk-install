@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# PYTHON_ARGCOMPLETE_OK
 
 import argparse
 import numpy as np
@@ -64,6 +65,11 @@ def main():
     parser.add_argument("-i", "--input", required=True, help="Input NIfTI file (.nii or .nii.gz)")
     parser.add_argument("-d", "--output-dir", required=True, help="Output directory for PNG slices")
     parser.add_argument("-o", "--prefix", default="slice", help="Filename prefix for slices (default: slice)")
+    try:
+        import argcomplete
+        argcomplete.autocomplete(parser)
+    except ImportError:
+        pass
     args = parser.parse_args()
 
     nifti_to_png_slices(args.input, args.output_dir, args.prefix)

@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# PYTHON_ARGCOMPLETE_OK
 
 from argparse import ArgumentParser
 from pathlib import Path
@@ -179,7 +180,13 @@ def register_sequence(
 
 def main(argv=None) -> int:
     """Main function."""
-    args = parser().parse_args(argv)
+    p = parser()
+    try:
+        import argcomplete
+        argcomplete.autocomplete(p)
+    except ImportError:
+        pass
+    args = p.parse_args(argv)
     logging.basicConfig(format="%(asctime)s [%(levelname)s] %(message)s", level=args.log_level)
     register_sequence(
         dofout=args.dofout,
