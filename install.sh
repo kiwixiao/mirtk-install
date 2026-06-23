@@ -35,13 +35,22 @@ Available platforms: $(ls "${CHANNEL_DIR}" 2>/dev/null | tr '\n' ' ')
 To build from source on this platform, see HOW_TO_BUILD.md"
 fi
 
-# --- Index the local channel ---
-info "Indexing local channel..."
-conda index "${CHANNEL_DIR}" 2>/dev/null || {
-    warn "conda-index not found, installing..."
-    conda install conda-build -y -q > /dev/null 2>&1
-    conda index "${CHANNEL_DIR}"
-}
+# --- (Re)index the local channel (best-effort) ---
+# The repo already ships valid repodata.json for the channel, so conda can
+# install from it without re-indexing. Indexing is therefore optional and must
+# never abort the install. We try the standalone indexer module first
+# (`python -m conda_index`) because the `conda index` subcommand plugin is
+# broken on some conda versions (TypeError: unexpected keyword argument
+# 'prog_name', a conda-index/click incompatibility); if neither is available we
+# simply use the committed repodata.
+info "Refreshing local channel index (optional)..."
+if python -m conda_index "${CHANNEL_DIR}" >/dev/null 2>&1; then
+    info "Channel index refreshed (python -m conda_index)."
+elif conda index "${CHANNEL_DIR}" >/dev/null 2>&1; then
+    info "Channel index refreshed (conda index)."
+else
+    warn "Could not run an indexer; using the repodata.json shipped in the repo (this is fine)."
+fi
 
 # --- Create env if needed ---
 # The local channel provides only the 'mirtk' package; its dependencies
