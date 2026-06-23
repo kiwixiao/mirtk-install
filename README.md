@@ -1,63 +1,100 @@
 # MIRTK Installer
 
-Pre-built conda packages for [MIRTK](https://github.com/BioMedIA/MIRTK) (Medical Image Registration ToolKit).
+Self-contained installer for [MIRTK](https://github.com/BioMedIA/MIRTK) (Medical
+Image Registration ToolKit) plus the `mirtk-pipeline` registration/analysis
+tools. Ships a pre-built conda package, so no compilation is needed on supported
+platforms.
+
+> **Linux users: install from `main`.** The `main` branch is the current,
+> full-featured build — it includes the viewer-enabled MIRTK binary **and** the
+> `mirtk-pipeline` / `csa-slicer` tools and tab completion. (The older
+> `viewer-for-linux` / `viewer-for-mac` branches contain only the bare MIRTK
+> binary and are kept for reference.)
 
 ## Supported Platforms
 
-| Platform | Branch | Status |
-|----------|--------|--------|
-| macOS Apple Silicon (M1/M2/M3/M4) | [`viewer-for-mac`](https://github.com/kiwixiao/mirtk-install/tree/viewer-for-mac) | Available (with Viewer + FLTK) |
-| Linux x86_64 (Ubuntu, CentOS, etc.) | [`viewer-for-linux`](https://github.com/kiwixiao/mirtk-install/tree/viewer-for-linux) | Available (with Viewer + FLTK) |
+| Platform | Pre-built package on `main` | Notes |
+|----------|:--------------------------:|-------|
+| Linux x86_64 (Ubuntu, CentOS, etc.) | ✅ `linux-64` | Recommended. Viewer + FLTK included. |
+| macOS Apple Silicon (M1–M4) | ✅ `osx-arm64` | Works, but for the FLTK viewer use the [`viewer-for-mac`](https://github.com/kiwixiao/mirtk-install/tree/viewer-for-mac) branch. |
+| Other (Intel Mac, Windows, …) | ❌ | Build from source — see [Building from Source](#building-from-source). |
 
-## Quick Install
+## Quick Install (Linux x86_64)
 
-Pick the branch for your platform, then run the installer:
+**Requirements:** [Miniconda or Anaconda](https://docs.conda.io/en/latest/miniconda.html),
+`git`, and network access during install (the `csa-slicer` package is pulled
+from GitHub).
 
-**macOS Apple Silicon:**
 ```bash
-git clone -b viewer-for-mac https://github.com/kiwixiao/mirtk-install.git
+# 1. Clone the main branch (default)
+git clone https://github.com/kiwixiao/mirtk-install.git
 cd mirtk-install
+
+# 2. Run the installer
 bash install.sh
+
+# 3. Activate and use
+conda activate mirtk
+mirtk help
+mirtk-pipeline --help
 ```
 
-**Linux x86_64:**
-```bash
-git clone -b viewer-for-linux https://github.com/kiwixiao/mirtk-install.git
-cd mirtk-install
-bash install.sh
-```
+`install.sh` will:
 
-This will:
-1. Check that conda is installed
-2. Check your platform has a pre-built package
-3. Create a dedicated `mirtk` conda environment
-4. Install MIRTK and all dependencies
+1. Check that conda is installed and detect your platform.
+2. Create a dedicated `mirtk` conda environment from the bundled pre-built package.
+3. Verify the MIRTK binary (`mirtk help`).
+4. Install the `mirtk-pipeline` Python package (`mirtk-pipeline`, `mirtk-register-seq`, etc.).
+5. Install the `csa-slicer` package (`csa-legacy`, `csa-bifurcation`, `csa-aortic`).
 
 ## Usage
 
 ```bash
 conda activate mirtk
+
+# MIRTK toolkit
 mirtk help
 mirtk register --help
 mirtk transform-image --help
-mirtk view image.nii.gz
+mirtk view image.nii.gz          # FLTK viewer (Linux/main build)
+
+# Pipeline tools
+mirtk-pipeline --help            # registration pipeline (interactive or CLI)
+mirtk-prepare-slicer --help
 ```
 
-## Requirements
+## Tab completion (optional)
 
-- [Miniconda](https://docs.conda.io/en/latest/miniconda.html) or [Anaconda](https://www.anaconda.com/download)
+Argument completion for the `mirtk-*` commands is available via `argcomplete`
+but must be registered in your shell once. Add this to `~/.bashrc`:
+
+```bash
+for c in mirtk-pipeline mirtk-prepare-slicer mirtk-postprocess mirtk-register-seq \
+         mirtk-interpolate mirtk-decimate mirtk-scale-stl mirtk-preprocess \
+         mirtk-visualize mirtk-nifti-slices; do
+    eval "$(register-python-argcomplete "$c" 2>/dev/null)"
+done
+```
+
+Then `conda activate mirtk` and open a new shell. Completion fires only while the
+`mirtk` env is active. (File-path completion at the pipeline's *interactive*
+prompts works automatically — no setup needed.)
 
 ## Building from Source
 
-If your platform is not listed above, you can build from source using the
-[MIRTK source repo](https://github.com/kiwixiao/MIRTK):
+If your platform has no pre-built package, build the conda package from source
+using the recipe in this repo:
 
 ```bash
-git clone --recursive https://github.com/kiwixiao/MIRTK.git
-cd MIRTK
 conda install conda-build -y
 conda build conda-recipe/mirtk --output-folder ~/conda-channel
+conda create -n mirtk -c ~/conda-channel mirtk -y
+conda activate mirtk
+pip install .                    # install the mirtk-pipeline package
 ```
+
+See [`conda-recipe/mirtk/HOW_TO_BUILD.md`](conda-recipe/mirtk/HOW_TO_BUILD.md)
+for details. The MIRTK C++ sources are vendored under [`mirtk-source/`](mirtk-source/).
 
 ## What is MIRTK?
 
