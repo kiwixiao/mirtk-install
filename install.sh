@@ -44,12 +44,18 @@ conda index "${CHANNEL_DIR}" 2>/dev/null || {
 }
 
 # --- Create env if needed ---
+# The local channel provides only the 'mirtk' package; its dependencies
+# (fltk, vtk, mesalib, tbb, xorg libs, ...) come from conda-forge. We pass
+# conda-forge + the local channel explicitly and use --override-channels so
+# the solve does not depend on the machine's configured channels (avoids the
+# common 'defaults' vs 'conda-forge' conflicts that break dependency solving).
+CHANNEL_ARGS=(--override-channels -c conda-forge -c "file://${CHANNEL_DIR}")
 if conda env list | grep -q "^${ENV_NAME} "; then
     warn "Conda env '${ENV_NAME}' already exists. Updating..."
-    conda install -n "${ENV_NAME}" -c "file://${CHANNEL_DIR}" mirtk -y
+    conda install -n "${ENV_NAME}" "${CHANNEL_ARGS[@]}" mirtk -y
 else
     info "Creating conda env '${ENV_NAME}'..."
-    conda create -n "${ENV_NAME}" -c "file://${CHANNEL_DIR}" mirtk -y
+    conda create -n "${ENV_NAME}" "${CHANNEL_ARGS[@]}" mirtk -y
 fi
 
 # --- Verify mirtk binary ---

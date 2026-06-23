@@ -87,6 +87,23 @@ Then `conda activate mirtk` and open a new shell. Completion fires only while th
 `mirtk` env is active. (File-path completion at the pipeline's *interactive*
 prompts works automatically — no setup needed.)
 
+## Troubleshooting
+
+**`Could not solve for environment specs` / `mirtk requires fltk >=1.3.10 ...`**
+
+The bundled local channel ships only the `mirtk` package — its dependencies
+(`fltk`, `vtk`, `mesalib`, `tbb`, xorg libs, …) come from **conda-forge**. This
+happens when conda-forge isn't used for the solve. `install.sh` handles it
+automatically, but if you installed manually or have an older clone, create the
+env with conda-forge forced:
+
+```bash
+conda create -n mirtk --override-channels -c conda-forge -c "file://$(pwd)/packages" mirtk -y
+conda activate mirtk
+pip install .
+pip install "csa-slicer @ git+https://github.com/kiwixiao/csa.git#subdirectory=python_slicer"
+```
+
 ## Building from Source
 
 If your platform has no pre-built package, build the conda package from source
