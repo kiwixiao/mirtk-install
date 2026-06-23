@@ -5,6 +5,13 @@ Image Registration ToolKit) plus the `mirtk-pipeline` registration/analysis
 tools. Ships a pre-built conda package, so no compilation is needed on supported
 platforms.
 
+> ✅ **Viewer included.** The bundled Linux (`linux-64`) binary is built **with
+> the FLTK/OpenGL viewer**, so `mirtk view` works out of the box (it links
+> `libfltk`, `libGL`, and `libX11`). The ~11 MB package is committed to this
+> repo, so a fresh `git clone` of `main` pulls the complete viewer-enabled
+> binary — no separate download or build step. A graphical display is required
+> to use the viewer (local desktop, `ssh -X`, or VNC).
+
 > **Linux users: install from `main`.** The `main` branch is the current,
 > full-featured build — it includes the viewer-enabled MIRTK binary **and** the
 > `mirtk-pipeline` / `csa-slicer` tools and tab completion. (The older
