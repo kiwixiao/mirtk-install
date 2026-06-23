@@ -45,11 +45,12 @@ conda index "${CHANNEL_DIR}" 2>/dev/null || {
 
 # --- Create env if needed ---
 # The local channel provides only the 'mirtk' package; its dependencies
-# (fltk, vtk, mesalib, tbb, xorg libs, ...) come from conda-forge. We pass
-# conda-forge + the local channel explicitly and use --override-channels so
-# the solve does not depend on the machine's configured channels (avoids the
-# common 'defaults' vs 'conda-forge' conflicts that break dependency solving).
-CHANNEL_ARGS=(--override-channels -c conda-forge -c "file://${CHANNEL_DIR}")
+# (fltk, vtk, mesalib, tbb, xorg libs, ...) come from conda-forge + defaults.
+# 'defaults' is required: conda-forge's libllvm21 (pulled in by mesalib) needs
+# libxml2 >=2.14, but vtk-base 9.4.2 pins libxml2 <2.14 -- only defaults ships a
+# libllvm21 build compatible with libxml2 2.13.x, which resolves the conflict.
+# --override-channels keeps the solve deterministic regardless of ~/.condarc.
+CHANNEL_ARGS=(--override-channels -c conda-forge -c defaults -c "file://${CHANNEL_DIR}")
 if conda env list | grep -q "^${ENV_NAME} "; then
     warn "Conda env '${ENV_NAME}' already exists. Updating..."
     conda install -n "${ENV_NAME}" "${CHANNEL_ARGS[@]}" mirtk -y

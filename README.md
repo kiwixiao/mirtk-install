@@ -92,17 +92,22 @@ prompts works automatically — no setup needed.)
 **`Could not solve for environment specs` / `mirtk requires fltk >=1.3.10 ...`**
 
 The bundled local channel ships only the `mirtk` package — its dependencies
-(`fltk`, `vtk`, `mesalib`, `tbb`, xorg libs, …) come from **conda-forge**. This
-happens when conda-forge isn't used for the solve. `install.sh` handles it
-automatically, but if you installed manually or have an older clone, create the
-env with conda-forge forced:
+(`fltk`, `vtk`, `mesalib`, `tbb`, xorg libs, …) come from **conda-forge** plus
+**defaults**. Both are needed: conda-forge's `libllvm21` (pulled in by `mesalib`)
+wants `libxml2 >=2.14`, while `vtk-base 9.4.2` pins `libxml2 <2.14` — only
+`defaults` provides a `libllvm21` build compatible with `libxml2 2.13.x`, which
+resolves the conflict. `install.sh` handles this automatically, but if you
+installed manually or have an older clone, create the env with both channels:
 
 ```bash
-conda create -n mirtk --override-channels -c conda-forge -c "file://$(pwd)/packages" mirtk -y
+conda create -n mirtk --override-channels -c conda-forge -c defaults -c "file://$(pwd)/packages" mirtk -y
 conda activate mirtk
 pip install .
 pip install "csa-slicer @ git+https://github.com/kiwixiao/csa.git#subdirectory=python_slicer"
 ```
+
+> If solving keeps fighting conda-forge drift, the **conda-pack** tarball
+> (a snapshot of a fully-working env) sidesteps dependency solving entirely.
 
 ## Building from Source
 
