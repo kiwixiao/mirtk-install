@@ -123,9 +123,22 @@ def run(cmd, **kwargs):
     """Run a subprocess, tee stdout/stderr to log file if logging is active."""
     kwargs.setdefault("check", True)
     if _log_file_handle is not None:
-        # Capture output and tee to both terminal and log
-        result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                                text=True, **kwargs)
+        # Capture output and tee to both terminal and log.
+        # check=True makes subprocess.run raise before we get a chance to tee,
+        # so catch it, flush the captured output (which holds the traceback,
+        # since stderr is folded into stdout), then re-raise.
+        try:
+            result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                                    text=True, **kwargs)
+        except subprocess.CalledProcessError as exc:
+            output = exc.output or ""
+            sys.stdout.write(output)
+            _log_file_handle.write(output)
+            _log_file_handle.write(
+                "\n[ERROR] Command failed (exit {}): {}\n".format(
+                    exc.returncode, " ".join(str(c) for c in cmd)))
+            _log_file_handle.flush()
+            raise
         sys.stdout.write(result.stdout)
         _log_file_handle.write(result.stdout)
         _log_file_handle.flush()
@@ -592,7 +605,7 @@ def main():
                 run(
                     ["python", str(PIPELINE_DIR / "visualize.py"),
                      str(results_dir / "interpolated_stls"),
-                     "--interval", "5", "--duration", "10",
+                     "--duration", "10",
                      "--csv", str(results_dir / table_name)],
                     check=True,
                 )
@@ -891,7 +904,7 @@ def main():
             run(
                 ["python", str(PIPELINE_DIR / "visualize.py"),
                  str(results_dir / "interpolated_stls"),
-                 "--interval", "5", "--duration", "10",
+                 "--duration", "10",
                  "--csv", str(results_dir / table_name)],
                 check=True,
             )

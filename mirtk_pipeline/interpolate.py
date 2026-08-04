@@ -267,7 +267,18 @@ def main():
         time_points, mesh_points, axis=0, bounds_error=True,
         assume_sorted=True, kind='cubic'
     )
-    ts = np.arange(args.start, args.stop + args.step, args.step)
+    # Build the sample grid without ever exceeding --stop (the interpolator has
+    # bounds_error=True, so a single overshooting sample aborts the whole run).
+    # When --step does not divide the span evenly, append the remainder so the
+    # final time point is still covered; the last interval is then shorter.
+    n_full = int(np.floor((args.stop - args.start) / args.step + 1e-9))
+    ts = args.start + args.step * np.arange(n_full + 1)
+    if not np.isclose(ts[-1], args.stop):
+        remainder = args.stop - ts[-1]
+        print("Step {} does not divide the {}->{} span evenly; appending "
+              "remainder endpoint t={} (final interval {} ms)".format(
+                  args.step, args.start, args.stop, args.stop, remainder))
+        ts = np.append(ts, args.stop)
 
     # Evaluate all time points at once (vectorized)
     print("Interpolating {} time steps...".format(len(ts)))
