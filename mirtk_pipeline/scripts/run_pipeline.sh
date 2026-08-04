@@ -182,8 +182,11 @@ parse_input_txt() {
 
 extract_4d_frames() {
     local image4d="$1"
-    info "Extracting $timePoints frames from 4D image starting at frame $beginPoint"
-    mirtk extract-image-volume "$image4d" -t "$beginPoint" -n "$timePoints" extracted_static.nii.gz
+    # input.txt beginPoint is 1-based (1 => first frame); mirtk extract-image-volume -t
+    # is a 0-based volume index. Convert so the 1-based input.txt convention is preserved.
+    local startIndex=$((beginPoint - 1))
+    info "Extracting $timePoints frames from 4D image starting at frame $beginPoint (1-based, = volume index $startIndex)"
+    mirtk extract-image-volume "$image4d" -t "$startIndex" -n "$timePoints" extracted_static.nii.gz
     local i=0
     # B2 fix: tighten glob to .nii.gz only
     for x in extracted_static*.nii.gz; do
@@ -208,6 +211,9 @@ copy_3d_frames() {
     done < <(ls -1v "$frames_dir"/*.nii* 2>/dev/null)
     if [ "$count" -eq 0 ]; then
         error "No .nii/.nii.gz files found in $frames_dir"
+    fi
+    if [ "$count" -ne "$timePoints" ]; then
+        error "Frame count mismatch: found $count image(s) in $frames_dir but input.txt timePoints=$timePoints. These must match (one 3D image per time point, in natural-sort order)."
     fi
     info "Copied $count 3D frames from $frames_dir"
 }

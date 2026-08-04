@@ -161,10 +161,17 @@ def parse_input_txt(input_file: Path) -> dict:
 
 
 def extract_4d_frames(image4d: Path, time_points: int, begin_point: int):
-    log.info(f"Extracting {time_points} frames from 4D image starting at frame {begin_point}")
+    # input.txt uses 1-based frame numbering (beginPoint=1 => first frame), but
+    # `mirtk extract-image-volume -t` is a 0-based volume index. Convert here so the
+    # 1-based input.txt convention is preserved. Keep run_pipeline.sh in sync.
+    if begin_point < 1:
+        error(f"beginPoint in input.txt must be 1-based (>= 1), got {begin_point}")
+    start_index = begin_point - 1
+    log.info(f"Extracting {time_points} frames from 4D image starting at frame "
+             f"{begin_point} (1-based, = volume index {start_index})")
     run(
         ["mirtk", "extract-image-volume", str(image4d),
-         "-t", str(begin_point), "-n", str(time_points),
+         "-t", str(start_index), "-n", str(time_points),
          "extracted_static.nii.gz"],
         check=True,
     )
@@ -184,6 +191,12 @@ def copy_3d_frames(frames_dir: Path, time_points: int, begin_point: int):
     )
     if not nii_files:
         error(f"No .nii/.nii.gz files found in {frames_dir}")
+    if len(nii_files) != time_points:
+        error(
+            f"Frame count mismatch: found {len(nii_files)} image(s) in {frames_dir} "
+            f"but input.txt timePoints={time_points}. These must match "
+            f"(one 3D image per time point, in natural-sort order)."
+        )
     for i, x in enumerate(nii_files):
         shutil.copy2(str(x), f"staticImage_t{begin_point}_n{time_points}_{i}.nii.gz")
     log.info(f"Copied {len(nii_files)} 3D frames from {frames_dir}")
