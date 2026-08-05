@@ -297,10 +297,20 @@ def main():
             indices = farthest_point_sample(all_points[0], args.downsample)
             table = table.iloc[indices]
         print("Write STAR table with shape", table.shape)
+        table_parent = os.path.dirname(args.output_table)
+        if table_parent:
+            os.makedirs(table_parent, exist_ok=True)
         table.to_csv(args.output_table, index=False, quoting=csv.QUOTE_NONNUMERIC)
 
     # Write interpolated STL meshes
     if args.output_mesh:
+        # Create the destination directory. run_pipeline.py only ever mkdir'd the
+        # hardcoded "interpolated_stls", so calling this script directly with any
+        # other --output-mesh path failed per-file in the VTK writer with an
+        # unhelpful "No such file or directory" and produced zero meshes.
+        out_parent = os.path.dirname(args.output_mesh.format(i=0, t=0.0))
+        if out_parent:
+            os.makedirs(out_parent, exist_ok=True)
         print("Writing {} STL meshes...".format(len(ts)))
         for i, t in enumerate(ts):
             mesh = replace_mesh_points(initial_mesh, all_points[i])
