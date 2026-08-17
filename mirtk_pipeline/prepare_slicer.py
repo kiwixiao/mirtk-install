@@ -230,6 +230,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="Where to create the subject folder (default: ../)",
     )
     p.add_argument(
+        "--subject",
+        type=str,
+        default="",
+        help="Subject ID for the output folder (skips filename-based detection)",
+    )
+    p.add_argument(
         "--legacy",
         action="store_true",
         help="Use old LeftNoseDecending/RightNose layout",
@@ -289,9 +295,13 @@ def main(argv: list[str] | None = None) -> int:
         log.error("Registration folder not found: %s", reg_dir)
         return 1
 
-    # --- Detect subject ID ---
-    subject = detect_subject_id(reg_dir, cwd)
-    log.info("Detected subject: %s", subject)
+    # --- Subject ID: explicit flag wins, filename detection as fallback ---
+    if args.subject:
+        subject = args.subject
+        log.info("Subject (from --subject): %s", subject)
+    else:
+        subject = detect_subject_id(reg_dir, cwd)
+        log.info("Detected subject: %s", subject)
 
     # --- Determine output location ---
     if args.output_dir is not None:

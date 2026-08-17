@@ -939,7 +939,13 @@ def main():
     if opt_prepare_slicer:
         print("")
         log.info("Running prepare-slicer...")
-        run(["mirtk-prepare-slicer", "--reg-dir", str(results_dir)])
+        # Pass the subject the user already provided so the CSA folder gets the
+        # right name (otherwise prepare-slicer falls back to filename detection,
+        # which inside the results dir would pick up e.g. img_0.nii.gz -> "img").
+        prep_cmd = ["mirtk-prepare-slicer", "--reg-dir", str(results_dir)]
+        if subject:
+            prep_cmd += ["--subject", subject]
+        run(prep_cmd)
     else:
         if shutil.which("mirtk-prepare-slicer"):
             log.info(f"To prepare for CSA: mirtk-prepare-slicer --reg-dir {results_dir}")

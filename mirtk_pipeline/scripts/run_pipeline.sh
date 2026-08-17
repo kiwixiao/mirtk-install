@@ -903,7 +903,13 @@ info "Pipeline log:   $RESULTS_DIR/pipeline.log"
 if [ "$opt_prepare_slicer" = true ]; then
     echo ""
     info "Running prepare-slicer..."
-    mirtk-prepare-slicer --reg-dir "$RESULTS_DIR"
+    # Pass the subject the user already provided so the CSA folder gets the
+    # right name (filename detection inside the results dir would pick "img").
+    if [ -n "$subject" ]; then
+        mirtk-prepare-slicer --reg-dir "$RESULTS_DIR" --subject "$subject"
+    else
+        mirtk-prepare-slicer --reg-dir "$RESULTS_DIR"
+    fi
 else
     if command -v mirtk-prepare-slicer &> /dev/null; then
         info "To prepare for CSA: mirtk-prepare-slicer --reg-dir $RESULTS_DIR"
