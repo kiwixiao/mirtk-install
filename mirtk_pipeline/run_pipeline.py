@@ -238,9 +238,15 @@ def extract_stl_from_mask(segmask: Path, output_stl: str):
 def perform_alignment(static_image: str, first_image: str, man_seg_stl: str,
                        aligned_stl: str, aligned_mask: str, alignment_dof: str,
                        initial: str, align_mode: str, align_config: str,
-                       ds: str, levels: str, align_be: str):
+                       ds: str, levels: str, align_be: str,
+                       force: bool = False):
+    # force=True re-runs every step even if the outputs already exist. Required for the
+    # --reuse-reg path, which runs INSIDE a prior results dir that already contains
+    # alignment.dof.gz / seg_0.stl / seg_0.nii.gz from the earlier run -- without force
+    # the existence checks below would silently skip the requested alignment and leave
+    # the stale (possibly unaligned) seg_0.stl in place while labeling the run "aligned".
     # Register static image to first time point
-    if not Path(alignment_dof).exists():
+    if force or not Path(alignment_dof).exists():
         log.info("Registering static image to time-zero frame")
         if align_mode == "config":
             run(
@@ -262,7 +268,7 @@ def perform_alignment(static_image: str, first_image: str, man_seg_stl: str,
         log.warning("Alignment DOF already exists, skipping")
 
     # Transform manual segmentation STL to time-zero
-    if not Path(aligned_stl).exists():
+    if force or not Path(aligned_stl).exists():
         log.info("Transforming STL to time-zero using alignment")
         run(["mirtk", "transform-points", man_seg_stl, aligned_stl,
              "-dofin", alignment_dof])
@@ -270,7 +276,7 @@ def perform_alignment(static_image: str, first_image: str, man_seg_stl: str,
         log.warning("Aligned STL already exists, skipping")
 
     # Generate binary mask from aligned STL
-    if not Path(aligned_mask).exists():
+    if force or not Path(aligned_mask).exists():
         log.info("Generating binary mask from aligned STL")
         run(["mirtk", "extract-pointset-surface",
              "-input", aligned_stl, "-mask", aligned_mask,
@@ -580,10 +586,14 @@ def main():
             interactive_stl_selection(str(seg_mask_path), man_seg_stl)
 
         if agn.lower().startswith("y"):
+            # Reusing a prior results dir: force a real re-alignment. The dir already
+            # holds seg_0.stl / seg_0.nii.gz / alignment.dof.gz from the earlier run,
+            # so without force=True perform_alignment would silently skip and reuse them.
             perform_alignment(
                 static_image, first_image_link, man_seg_stl,
                 aligned_stl, aligned_mask, "alignment.dof.gz",
                 initial, align_mode, "./register_work.cfg", ds, lev, a_be,
+                force=True,
             )
         else:
             skip_alignment(man_seg_stl, str(seg_mask_path), aligned_stl, aligned_mask)

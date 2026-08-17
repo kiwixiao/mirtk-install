@@ -525,6 +525,11 @@ if [ -n "$opt_reuse_reg" ]; then
     fi
 
     if [[ "$agn" == y* || "$agn" == Y* ]]; then
+        # Reusing a prior results dir: remove stale alignment outputs so perform_alignment
+        # actually re-runs. It skips any step whose output file already exists, which would
+        # otherwise silently reuse the old seg_0.stl / seg_0.nii.gz / alignment.dof.gz and
+        # leave the run mislabeled "aligned" without ever aligning.
+        rm -f "alignment.dof.gz" "$alignedSTL" "$alignedMask"
         perform_alignment "$StaticImage" "$firstImageLink" "$man_segSTL" \
             "$alignedSTL" "$alignedMask" "alignment.dof.gz" \
             "$initial" "$align_mode" "./register_work.cfg" "$DS" "$L" "$aBE"
